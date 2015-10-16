@@ -60,7 +60,7 @@ void Node::set_rightchild( Node* r)
 {
 	m_rightchild = r;
 }
-
+/*
 void Node::replace_with_successor() 
 	                            
 {
@@ -83,7 +83,7 @@ void Node::replace_with_predecessor()
 	m_key = tmp->key(); 
 	tree_remove( tmp, tmp->key().key()); 
 }
-
+*/
 
 
 void tree_init( Tree* t) 
@@ -126,10 +126,6 @@ Node* tree_search( string k, Tree t)
 	{
 		return t;
 	}
-	else if ( t->key().key().find(k.substr(0,k.find(' '))) != -1)
-	{
-		return t;
-	}
 	else if ( k < t->key().key()) 
 	{
 		return tree_search( k, t->leftchild());
@@ -137,6 +133,35 @@ Node* tree_search( string k, Tree t)
 	else
 	{
 		return tree_search( k, t->rightchild());
+	}
+}
+
+Node* tree_initsearch( string k, Tree t)
+{
+	vector<string> matches;
+	tree_keymatches( t, k, matches);
+	if (matches.size() == 0) return NULL;
+	return tree_search( matches[rand()%matches.size()], t);
+}
+
+void tree_keymatches( Node* n, string k, vector<string>& matches)
+{
+	if(n->key().key().find(k.substr(0,k.find(' '))+" ") != -1)
+	{
+		matches.push_back(n->key().key()); 
+	}
+	if ( n->leftchild() && n->rightchild())
+	{
+		tree_keymatches( n->leftchild(), k, matches);
+		tree_keymatches( n->rightchild(), k, matches);
+	}
+	else if ( n->leftchild() && !n->rightchild())
+	{
+		tree_keymatches( n->leftchild(), k, matches);
+	}
+	else if ( !n->leftchild() && n->rightchild())
+	{
+		tree_keymatches( n->rightchild(), k, matches);
 	}
 }
 
@@ -170,7 +195,7 @@ void tree_insert( Tree* t, string k, string s)
 	}
 	
 }
-
+/*
 void tree_remove( Node* t, string k)
 {
 	Node* to_rm = tree_search( k, t); 
@@ -225,6 +250,7 @@ void tree_remove( Node* t, string k)
 						 
 	}
 }
+*/
 /*
 void tree_preorder( Node* n, ofstream &file)
 {

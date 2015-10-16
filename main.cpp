@@ -11,6 +11,16 @@
 
 using namespace std;
 
+bool has_space( string val)
+{
+	for ( string::iterator i = val.begin(); i != val.end(); i++)
+	{
+		if (*i == ' ') return true;
+	}
+	return false;
+}
+
+
 vector<string> markov_primer( string s)
 {
 	vector<string> m_mkv;
@@ -19,6 +29,7 @@ vector<string> markov_primer( string s)
 		m_mkv.push_back(s.substr(0,s.find(' ')));
 		s = s.substr(s.find(' ')+1,s.size()-1);
 	}
+	m_mkv.push_back(s);
 	return m_mkv;
 }
 
@@ -45,6 +56,7 @@ int main()
 			{
 				string cur = bufsplit[i]+" "+bufsplit[i+1];
 				string nxt = bufsplit[i+1]+" "+bufsplit[i+2];
+		//		cout << cur << " --> " << nxt << endl;
 				if ( tree_empty( db)) 
 				{
 					db = tree_makenode( cur, nxt, NULL);
@@ -56,7 +68,9 @@ int main()
 					Tree tmp = tree_search(cur, db);
 					if (tmp)
 					{
+						//cout << cur << " --> " << nxt << endl;
 						tmp->key().add(nxt);
+						//tmp->key().print();
 					}
 					else
 					{
@@ -64,7 +78,6 @@ int main()
 					}
 				}
 			}
-
 			tree_insert( &db, bufsplit[bufsplit.size()-2]+" "+bufsplit[bufsplit.size()-1], "");
 		}
 	}
@@ -85,7 +98,7 @@ int main()
 	char thought[510];
 	char buf[513];
 	stringstream sthought;
-	string output, thoughtstr;
+	string output, thoughtstr, lthoughtstr;
 
 	while (1)
 	{
@@ -105,17 +118,26 @@ int main()
 			if ( !strcmp(cmd,"GET"))
 			{
 				sthought << thoughtstr.substr(0,thoughtstr.find(' ')) << " ";
-				Tree tmp;
-				do
+				Tree tmp = NULL;
+				while ( thoughtstr != "")
 				{
-					tmp = tree_search( thoughtstr, db);
+					if (!tmp) tmp = tree_initsearch( thoughtstr, db);
+					else tmp = tree_search( thoughtstr, db);
 					if (!tmp) break;
+					lthoughtstr = thoughtstr;
 					thoughtstr = tmp->key().get();
-					sthought << thoughtstr.substr(0,thoughtstr.find(' ')) << " ";
-				} while ( thoughtstr != "");
-				sthought << thoughtstr.substr(thoughtstr.find(' ')+1,thoughtstr.size()-1);
+					sthought << thoughtstr.substr(0,thoughtstr.find(' '));
+					if (thoughtstr == lthoughtstr)
+					{
+						thoughtstr = thoughtstr.substr(0,thoughtstr.find(' '));
+					}
+					if (thoughtstr != "") sthought << " ";
+				}
+				if (lthoughtstr.find(' ') != -1)
+				{
+					sthought << lthoughtstr.substr(lthoughtstr.find(' ')+1,lthoughtstr.size()-1);
+				}
 				output = sthought.str();
-				cout << output << endl;
 				if (output.size() < 490) output.replace(output.size(),1,491-output.size(),'\0');
 				send(readskt,output.c_str(),490,0);
 				sthought.str("");
@@ -123,7 +145,45 @@ int main()
 			}
 			else if ( !strcmp(cmd,"ADD"))
 			{
-				cout << "u add" << endl;
+				bufsplit = markov_primer( thoughtstr);
+				cout << thoughtstr << bufsplit.size() << endl;
+				if (bufsplit.size() > 2)
+				{
+					for( int i = 0; i < bufsplit.size() - 2; i++)
+					{
+						string cur = bufsplit[i]+" "+bufsplit[i+1];
+						string nxt = bufsplit[i+1]+" "+bufsplit[i+2];
+						if ( tree_empty( db)) 
+						{
+							db = tree_makenode( cur, nxt, NULL);
+							
+							db->key().add(nxt);
+						}
+						else
+						{	
+							Tree tmp = tree_search(cur, db);
+							if (tmp)
+							{
+								//cout << cur << " --> " << nxt << endl;
+								tmp->key().add(nxt);
+								//tmp->key().print();
+							}
+							else
+							{
+								tree_insert( &db, cur, nxt);
+							}
+						}
+					}
+
+					tree_insert( &db, bufsplit[bufsplit.size()-2]+" "+bufsplit[bufsplit.size()-1], "");
+				}
+				send(readskt,"",490,0);
+			}
+			else if ( !strcmp(cmd,"SCH"))
+			{
+				Node* tmp = tree_search(thoughtstr,db);
+				if(tmp) tmp->key().print();
+				send(readskt,"",490,0);
 			}
 		}
 	}

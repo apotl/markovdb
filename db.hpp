@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 typedef Fragment Key;
 
@@ -12,7 +13,7 @@ class Node
 {
 	public:
 		
-		friend void tree_remove( Node* t, string k);
+//		friend void tree_remove( Node* t, string k);
 		friend void tree_insert( Node** t, string k, string s);
 	
 		Key& key();
@@ -28,8 +29,8 @@ class Node
 
 	private:
 		
-		void replace_with_successor();
-		void replace_with_predecessor();
+//		void replace_with_successor();
+//		void replace_with_predecessor();
 
 		
 		Key m_key;
@@ -44,6 +45,8 @@ void tree_init( Tree* t);
 void tree_makenull( Tree t);
 Node* tree_makenode( string k, string s, Node* parent);
 Node* tree_search( string k, Tree t);
+Node* tree_initsearch( string k, Tree t);
+void tree_keymatches( Node* n, string k, vector<string>& matches);
 void tree_insert( Tree* t, string k, string s);
 void tree_remove( Node* t, string k);
 //void tree_preorder( Node* n, ofstream &file);

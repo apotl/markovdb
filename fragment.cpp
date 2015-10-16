@@ -13,10 +13,21 @@ void Fragment::set(string val)
 
 void Fragment::add( string val)
 {
-	if ( !exists(val) && m_last < MAX-1 )
+	if ( m_last < MAX-1)
 	{
-		m_data[m_last+1] = val;
-		m_last++;
+		int index = exists(val);
+		if ( index < 0)
+		{
+			struct word tmp;
+			tmp.data = val;
+			tmp.weight = 1;
+			m_data[m_last+1] = tmp;
+			m_last++;
+		}
+		else
+		{
+			m_data[index].weight++;
+		}
 	}
 }
 
@@ -27,8 +38,15 @@ string Fragment::key()
 
 string Fragment::get()
 {
-	if ((rand()%16)<15) return m_data[rand()%(m_last+1)];
-	return "";
+	int ttl = total();
+	int choice = rand()%ttl;
+	int i = 0;
+	for ( ; choice > 0 && i <= m_last; i++)
+	{
+		choice -= m_data[i].weight;
+	}
+	if (i == 1) i--;
+	return m_data[i].data;
 }
 
 void Fragment::print()
@@ -36,15 +54,25 @@ void Fragment::print()
 	cout << m_key << ":\n";
 	for (int i = 0; i <= m_last; i++)
 	{
-		cout << "	" << m_data[i] << endl;
+		cout << "	" << m_data[i].data << " (" << m_data[i].weight << ")" << endl;
 	}
 }
 
-bool Fragment::exists( string val)
+int Fragment::total()
+{
+	int ttl = 0;
+	for ( int i = 0; i <= m_last; i++)
+	{
+		ttl += m_data[i].weight;
+	}
+	return ttl;
+}
+
+int Fragment::exists( string val)
 {
 	for (int i = 0; i <= m_last; i++)
 	{
-		if ( val == m_data[i]) return true;
+		if ( val == m_data[i].data) return i;
 	}
-	return false;
+	return -1;
 }

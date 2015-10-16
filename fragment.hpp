@@ -8,6 +8,12 @@
 
 using namespace std;
 
+struct word
+{
+	string data;
+	int weight;
+};
+
 class Fragment
 {
 	public:
@@ -19,10 +25,12 @@ class Fragment
 		void print();
 
 	private:
+		void set( );
 		string m_key;
-		string m_data[MAX];
+		struct word m_data[MAX];
 		int m_last;
-		bool exists(string val);
+		int exists(string val);
+		int total();
 };
 
 #endif
